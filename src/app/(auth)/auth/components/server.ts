@@ -3,9 +3,11 @@ import { api } from "@/lib/axios";
 import { loginAuth, RegisterAuth } from "@/schemas/auth";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "next/dist/server/api-utils";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export function Register() {
+  const router = useRouter()
     const queryClient = useQueryClient()
     const {mutate,isPending,isError}  = useMutation({
       mutationKey : ["register"],
@@ -19,7 +21,9 @@ export function Register() {
       },
       onSuccess : ()  => {
         queryClient.invalidateQueries({queryKey : ["user"]})
+        router.push("/auth/login")
         toast.success("Register Berhasil")
+
       },
       onError : (error : ApiError) => {
         queryClient.cancelQueries({ queryKey : ["user"]})
@@ -41,11 +45,11 @@ export  function Login(){
     mutationKey : ["login"],
     mutationFn : async(req : loginAuth)  => {
         const request = await api.post("/auth/login",req)
-        console.log(request.data)
         return  request.data
     },
     onSuccess : ()  => {
-      queryClient.invalidateQueries({queryKey : ["user"]})
+      queryClient.invalidateQueries({ queryKey: ["user"] })
+      window.location.href = "/"
       toast.success("Login Berhasil")
     },
     onError : (error : ApiError) => {

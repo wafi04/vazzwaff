@@ -58,11 +58,11 @@ export default function RegisterPage() {
 
   return (
     <AuthPage>
-      <div className="mx-auto max-w-md w-full px-4">
-        <div className="bg-gray-800 rounded-xl p-6 shadow-2xl border border-gray-700">
+      <div className="w-full">
+        <div className=" rounded-xl p-4 sm:p-6 shadow-2xl ">
           <div className="mb-6 text-center">
-            <h1 className="text-2xl font-bold text-white mb-1">Buat Akun</h1>
-            <p className="text-gray-400 text-sm">Isi Dibawah Ini dengan </p>
+            <h1 className="text-2xl font-bold text-white mb-1">Daftar Akun</h1>
+            <p className="text-gray-300 text-sm">Daftarkan ke akun Anda</p>
           </div>
           
           {error && (
@@ -71,14 +71,14 @@ export default function RegisterPage() {
             </div>
           )}
           
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            <div className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-gray-300">Full Name</Label>
                 <Input
                   id="name"
                   type="text"
-                  placeholder="Enter your name"
+                  placeholder="Masukkan namamu"
                   className="bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
                   {...register('name')}
                 />
@@ -92,7 +92,7 @@ export default function RegisterPage() {
                 <Input
                   id="username"
                   type="text"
-                  placeholder="Choose a username"
+                  placeholder="Masukkan username"
                   className="bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
                   {...register('username')}
                 />
@@ -139,12 +139,12 @@ export default function RegisterPage() {
                     </svg>
                     Loading...
                   </span>
-                ) : 'Create Account'}
+                ) : 'Daftar'}
               </Button>
             </div>
 
-            <div className="text-center text-sm text-gray-400 mt-6">
-              Already have an account?{' '}
+            <div className="text-center text-sm text-gray-400 mt-4">
+              Sudah Punya Akun?{' '}
               <Link href="/auth/login" className="text-blue-400 hover:text-blue-300 hover:underline font-medium">
                 Log in
               </Link>

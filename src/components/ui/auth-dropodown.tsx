@@ -18,14 +18,15 @@ import {
   Settings,
   UserPlus,
 } from 'lucide-react';
-import { signOut } from 'next-auth/react';
 import Image from 'next/image';
 import { URL_LOGO } from '@/constants';
 import { Button } from './button';
 import { usePathname } from 'next/navigation';
+import { Logout } from '@/app/(auth)/auth/components/server';
 
 export function AuthDropdown({ user }: { user?: User }) {
   const pathname = usePathname();
+  const logout = Logout()
   const trigger = user ? (
     <ButtonProfile username={user.username} />
   ) : (
@@ -79,8 +80,8 @@ export function AuthDropdown({ user }: { user?: User }) {
       <DropdownMenuItem
         className="text-destructive cursor-pointer"
         onSelect={(e) => {
-          e.preventDefault();
-          signOut({ callbackUrl: '/' });
+          e.preventDefault()
+          logout.mutate()
         }}
       >
         <LogOut className="mr-2 h-4 w-4" />

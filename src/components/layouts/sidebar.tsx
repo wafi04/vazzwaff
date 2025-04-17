@@ -16,8 +16,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { signOut } from 'next-auth/react';
-import Link from "next/link";
+
 
 interface SidebarProps {
   open: boolean;

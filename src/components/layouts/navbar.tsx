@@ -7,7 +7,6 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { Sidebar } from './sidebar';
 import { User } from '@/types/schema/user';
-import { AuthDropdown } from '../ui/auth-dropodown';
 
 export function Navbar({ user }: { user?: User }) {
   const [openSidebar, setOpenSidebar] = useState<boolean>(false);
