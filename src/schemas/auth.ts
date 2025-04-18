@@ -23,3 +23,12 @@ export const updateUser = z.object({
 export type loginAuth = z.infer<typeof loginSchema>;
 export type RegisterAuth = z.infer<typeof registerSchema>;
 export type UpdateUser = z.infer<typeof updateUser>;
+
+
+export interface SessionsData {
+  createdAt: string
+expires: string
+id: string
+ipAdress: string
+userAgent: string
+}

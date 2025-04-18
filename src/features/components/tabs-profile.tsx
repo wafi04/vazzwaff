@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TableProfileTopup } from "../pages/profile/topup/table-profile-topup";
+import { TableProfileTopup } from "../../app/(main)/profile/_components/table-profile-topup";
 
 
 

@@ -34,10 +34,6 @@ export const dataNavAdmin: NavItem[] = [
         path: '/dashboard/data/joki',
       },
       {
-        nama: 'Pesanan Gift Skin',
-        path: '/dashboard/data/skin',
-      },
-      {
         nama: 'Pesanan Vilog',
         path: '/dashboard/data/dmvilog',
       },
@@ -49,7 +45,7 @@ export const dataNavAdmin: NavItem[] = [
     children: [
       {
         nama: 'Member Deposit',
-        path: '/dashboard/user-deposit',
+        path: '/dashboard/deposit',
       },
       {
         nama: 'Kelola Member',
@@ -86,7 +82,7 @@ export const dataNavAdmin: NavItem[] = [
   },
   {
     nama : "Metode",
-    path : "/dashboard/methode",
+    path : "/dashboard/methods",
     icon : <Wallet className='size-4'/>
   },
   {

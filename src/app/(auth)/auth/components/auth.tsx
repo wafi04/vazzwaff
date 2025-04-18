@@ -1,20 +1,16 @@
 "use client"
 import { URL_LOGO } from "@/constants"
 import Image from "next/image"
-import { useEffect, useState, type ReactNode } from "react"
+import {  type ReactNode } from "react"
 
 export function AuthPage({ children }: { children: ReactNode }) {
-  const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   return (
     <main
       className="w-full min-h-screen flex flex-col items-start justify-start relative bg-cover bg-center bg-no-repeat"
       style={{
-        backgroundImage: mounted ? "url('/bg-auth.webp')" : "none",
+        backgroundImage: "url('https://res.cloudinary.com/dikf91ikq/image/upload/v1744977714/workspaces/bg-auth_mlfihl.webp')" ,
         backgroundColor: "#f5f5f5",
       }}
     >
