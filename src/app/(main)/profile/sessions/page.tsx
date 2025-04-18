@@ -42,9 +42,8 @@ export default function SessionsPage() {
     <SettingsLayout>
       <div className="space-y-6">
         <div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-white mb-1">Aktivitas Sesi</h1>
-<p className="text-sm text-blue-300">Kelola akses dari perangkat lain dengan aman.</p>
-
+          <h1 className="text-3xl font-extrabold tracking-tight text-white mb-1">Aktivitas Sesi</h1>
+          <p className="text-sm text-blue-300">Kelola akses dari perangkat lain dengan aman.</p>
         </div>
         <div className="space-y-6">
           <div className="rounded-lg border border-blue-900 bg-[#00184a] p-6 shadow-xl">

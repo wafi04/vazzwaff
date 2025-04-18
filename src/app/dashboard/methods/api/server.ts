@@ -1,14 +1,15 @@
 import { api } from "@/lib/axios";
-import { CreateMethod, UpdateMethods } from "@/schemas/methods";
+import { CreateMethod, FilterMethod, MethodsData, MethodsResponse, UpdateMethods } from "@/schemas/methods";
+import { ApiResponse } from "@/types/response";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-export function useGetMethods() {
+export function useGetMethodsWithQuery(req : FilterMethod) {
     const { data, error, isLoading } = useQuery({
         queryKey: ["methods"],
         queryFn: async () => {
             try {
-                const res = await api.get("/methods");
+                const res = await api.get<ApiResponse<MethodsResponse>>("/methods");
                 return res.data;
             } catch (error) {
                 toast.error("Gagal memuat metode pembayaran");
@@ -21,7 +22,7 @@ export function useGetMethods() {
     });
 
     return {
-        data,
+        data  : data?.data,
         error,
         isLoading
     };

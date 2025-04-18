@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { api } from './lib/axios';
-export const REDIRECT = '/';
+import { ROLE_USER } from './constants';
+export const REDIRECT = '/auth/login';
 export const PUBLIC_ROUTES = ['/'];
 export const MEMBER_ROUTE = ['/profile'];
 export const ADMIN_ROUTE = ['/dashboard'];
@@ -10,15 +11,13 @@ export const AUTH_ROUTES = ['/auth/login', '/auth/register', '/auth/forgot-passw
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   
-  // Get session token from cookies
-  const sessionToken = request.cookies.get('session_token')?.value
-  
   // Skip token validation for public and auth routes
   if (PUBLIC_ROUTES.includes(pathname) || AUTH_ROUTES.some(route => pathname.startsWith(route))) {
     return NextResponse.next()
   }
   
   // If no token exists, redirect to login
+  const sessionToken = request.cookies.get('session_token')?.value
   if (!sessionToken) {
     return NextResponse.redirect(new URL('/auth/login', request.url))
   }
@@ -32,12 +31,26 @@ export async function middleware(request: NextRequest) {
     })
     
     if (response.statusCode === 200) {
+      // Get user role from response
+      const userRole = response.data?.data.user?.role as ROLE_USER
+      
+      // Check role-based access
+      if (ADMIN_ROUTE.some(route => pathname.startsWith(route)) && userRole !== 'Admin') {
+        // User is not admin but trying to access admin route
+        return NextResponse.redirect(new URL(REDIRECT, request.url))
+      }
+      
+      if (MEMBER_ROUTE.some(route => pathname.startsWith(route)) && 
+          userRole !== 'Member' && userRole !== 'Admin') {
+        // User is not member or admin but trying to access member route
+        return NextResponse.redirect(new URL(REDIRECT, request.url))
+      }
+      
       return NextResponse.next()
     } else if (response.statusCode === 401) {
       // Token is expired, try to refresh
       const refreshResult = await refreshToken(request)
       
-      // If refresh was successful, continue to requested page
       if (refreshResult.success) {
         const nextResponse = NextResponse.next()
         
@@ -59,7 +72,6 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/auth/login', request.url))
     }
   } catch (error) {
-    console.error('Token validation error:', error)
     return NextResponse.redirect(new URL('/auth/login', request.url))
   }
 }
