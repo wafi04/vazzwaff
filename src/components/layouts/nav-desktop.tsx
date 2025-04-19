@@ -1,10 +1,10 @@
-import Link from 'next/link';
+import Link from "next/link";
 
-import type { NavItems } from '@/types/schema/navbar';
-import type { User } from '@/types/schema/user';
-import { ButtonProfile } from '../ui/button-profile';
-import { AuthDropdown } from '../ui/auth-dropodown';
-import { NavItem } from '../ui/nav-item';
+import type { NavItems } from "@/types/schema/navbar";
+import type { User } from "@/types/schema/user";
+import { ButtonProfile } from "../ui/button-profile";
+import { AuthDropdown } from "../ui/auth-dropodown";
+import { NavItem } from "../ui/nav-item";
 
 interface DesktopSidebarProps {
   navItems: NavItems[];
@@ -50,9 +50,12 @@ export const DesktopSidebar = ({
     </div>
 
     {/* Footer */}
-    <div className="border-t border-t-sidebar-border p-4 flex items-center gap-2 text-sidebar-foreground">
-      <AuthDropdown user={user} />
-      <span className="text-secondary">{user.username}</span>
-    </div>
+
+    {user && (
+      <div className="border-t border-t-sidebar-border p-4 flex items-center gap-2 text-sidebar-foreground">
+        <AuthDropdown user={user} />
+        <span className="text-secondary">{user.username}</span>
+      </div>
+    )}
   </div>
 );

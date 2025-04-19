@@ -22,14 +22,13 @@ export class Api {
       withCredentials: true,
     });
 
-
     this.instance.interceptors.response.use(
       (response) => response,
       (error: AxiosError) => {
         const apiError: ApiError = {
           message: error.message,
           statusCode: error.response?.status,
-            error: error.code,
+          error: error.code,
         };
         return Promise.reject(apiError);
       }
@@ -72,9 +71,15 @@ export class Api {
     };
   }
 
-  async get<T>(url: string, config?: RequestConfig): Promise<ApiResponse<T>> {
+  async get<T>(
+    url: string,
+    params?: Record<string, any>,
+    config?: RequestConfig
+  ): Promise<ApiResponse<T>> {
     try {
+      // Kirim parameter langsung, bukan dalam objek 'params'
       const response: AxiosResponse<T> = await this.instance.get(url, {
+        params: params,
         headers: this.getHeaders(config),
       });
       return {
@@ -111,7 +116,6 @@ export class Api {
         message: response.statusText,
       };
     } catch (error) {
-      console.error("API Error:", error);
       throw this.handleError(error as AxiosError);
     }
   }
