@@ -34,7 +34,6 @@ export function TablePagination({
   onPageChange,
   onPerPageChange,
 }: TablePaginationProps) {
-  // Calculate range of items being displayed
   const startItem = totalItems === 0 ? 0 : (currentPage - 1) * perPage + 1;
   const endItem = Math.min(currentPage * perPage, totalItems);
 
@@ -54,13 +53,15 @@ export function TablePagination({
         >
           <ChevronLeft size={16} />
         </button>
-        
+
         <span className="text-xs font-medium">
           Halaman {currentPage} dari {totalPages || 1}
         </span>
-        
+
         <button
-          onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}
+          onClick={() =>
+            currentPage < totalPages && onPageChange(currentPage + 1)
+          }
           disabled={currentPage >= totalPages}
           className={`p-1 rounded ${
             currentPage >= totalPages
@@ -75,12 +76,11 @@ export function TablePagination({
     );
   };
 
-  // Desktop pagination renderer with dynamic visible pages
   const renderDesktopPagination = () => {
     const items = [];
-    const maxVisiblePages = window.innerWidth < 640 ? 1 : window.innerWidth < 768 ? 3 : 5;
-    
-    // Calculate start and end pages
+    const maxVisiblePages =
+      window.innerWidth < 640 ? 1 : window.innerWidth < 768 ? 3 : 5;
+
     let startPage = Math.max(
       1,
       Math.min(
@@ -91,12 +91,15 @@ export function TablePagination({
     startPage = Math.max(1, startPage);
     const endPage = Math.min(startPage + maxVisiblePages - 1, totalPages);
 
-    // Previous button
     items.push(
       <PaginationItem key="prev">
-        <PaginationPrevious 
+        <PaginationPrevious
           onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
-          className={currentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"} 
+          className={
+            currentPage <= 1
+              ? "pointer-events-none opacity-50"
+              : "cursor-pointer"
+          }
         />
       </PaginationItem>
     );
@@ -108,7 +111,7 @@ export function TablePagination({
           <PaginationLink onClick={() => onPageChange(1)}>1</PaginationLink>
         </PaginationItem>
       );
-      
+
       if (startPage > 2) {
         items.push(
           <PaginationItem key="ellipsis1" className="hidden sm:flex">
@@ -121,8 +124,11 @@ export function TablePagination({
     // Page numbers
     for (let i = startPage; i <= endPage; i++) {
       items.push(
-        <PaginationItem key={i} className={i !== currentPage ? "hidden xs:flex" : ""}>
-          <PaginationLink 
+        <PaginationItem
+          key={i}
+          className={i !== currentPage ? "hidden xs:flex" : ""}
+        >
+          <PaginationLink
             isActive={currentPage === i}
             onClick={() => onPageChange(i)}
           >
@@ -141,7 +147,7 @@ export function TablePagination({
           </PaginationItem>
         );
       }
-      
+
       items.push(
         <PaginationItem key={totalPages} className="hidden sm:flex">
           <PaginationLink onClick={() => onPageChange(totalPages)}>
@@ -154,9 +160,15 @@ export function TablePagination({
     // Next button
     items.push(
       <PaginationItem key="next">
-        <PaginationNext 
-          onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}
-          className={currentPage >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"} 
+        <PaginationNext
+          onClick={() =>
+            currentPage < totalPages && onPageChange(currentPage + 1)
+          }
+          className={
+            currentPage >= totalPages
+              ? "pointer-events-none opacity-50"
+              : "cursor-pointer"
+          }
         />
       </PaginationItem>
     );
@@ -175,17 +187,19 @@ export function TablePagination({
         <div className="grid grid-cols-1 gap-2">
           {/* Top row: Page info + navigation */}
           {renderMobilePagination()}
-          
+
           {/* Bottom row: Item counts + per page */}
           <div className="flex justify-between items-center text-xs">
             <div className="text-muted-foreground">
               {totalItems > 0 ? (
-                <>{startItem}-{endItem}/{totalItems}</>
+                <>
+                  {startItem}-{endItem}/{totalItems}
+                </>
               ) : (
                 <>0 data</>
               )}
             </div>
-            
+
             <div className="flex items-center gap-1">
               <Select
                 value={perPage.toString()}
@@ -206,13 +220,11 @@ export function TablePagination({
           </div>
         </div>
       </div>
-      
+
       {/* Small screen layout */}
       <div className="hidden sm:block md:hidden">
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-center">
-            
-            
             <div className="flex items-center gap-1 justify-between w-full">
               <span className="text-sm text-muted-foreground">Tampilkan</span>
               <Select
@@ -229,16 +241,18 @@ export function TablePagination({
                   <SelectItem value="50">50</SelectItem>
                 </SelectContent>
               </Select>
-            {renderDesktopPagination()}
+              {renderDesktopPagination()}
             </div>
           </div>
         </div>
       </div>
-      
+
       {/* Medium and large screen layout */}
       <div className="hidden md:flex md:flex-row items-center justify-between gap-4 py-2">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground whitespace-nowrap">Tampilkan</span>
+          <span className="text-sm text-muted-foreground whitespace-nowrap">
+            Tampilkan
+          </span>
           <Select
             value={perPage.toString()}
             onValueChange={(value) => onPerPageChange(parseInt(value))}
@@ -253,12 +267,16 @@ export function TablePagination({
               <SelectItem value="50">50</SelectItem>
             </SelectContent>
           </Select>
-          <span className="text-sm text-muted-foreground whitespace-nowrap">per halaman</span>
+          <span className="text-sm text-muted-foreground whitespace-nowrap">
+            per halaman
+          </span>
         </div>
 
         <div className="text-sm text-muted-foreground w-full">
           {totalItems > 0 ? (
-            <>Menampilkan {startItem} - {endItem} dari {totalItems} data</>
+            <>
+              Menampilkan {startItem} - {endItem} dari {totalItems} data
+            </>
           ) : (
             <>Tidak ada data</>
           )}

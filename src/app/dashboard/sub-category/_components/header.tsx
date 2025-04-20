@@ -1,14 +1,23 @@
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { PlusIcon, SearchIcon, XIcon } from 'lucide-react';
-import { JSX, useState } from 'react';
-
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { PlusIcon, SearchIcon, XIcon } from "lucide-react";
+import { JSX, useState } from "react";
+import DialogSubCategory from "./dialogSubCategory";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 export function HeaderSubCategory({
   onSearchChange,
+  onStatusChange,
 }: {
+  onStatusChange: (status: string) => void;
   onSearchChange: (term: string) => void;
 }): JSX.Element {
-  const [searchInput, setSearchInput] = useState('');
+  const [searchInput, setSearchInput] = useState("");
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,14 +31,26 @@ export function HeaderSubCategory({
 
   // Clear search
   const handleClearSearch = () => {
-    setSearchInput('');
-    onSearchChange('');
+    setSearchInput("");
+    onSearchChange("");
   };
 
   return (
     <section className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4 mb-6">
-      <h1 className="text-2xl font-bold text-card-foreground">Kategori</h1>
+      <h1 className="text-2xl font-bold text-card-foreground">Sub Category</h1>
       <div className="flex flex-col md:flex-row items-start md:items-center gap-4 w-full md:w-auto">
+        {/* Status dropdown */}
+        <Select onValueChange={onStatusChange} defaultValue="active">
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="inactive">Inactive</SelectItem>
+            <SelectItem value="all">All</SelectItem>
+          </SelectContent>
+        </Select>
+
         {/* Search input with button */}
         <div className="relative w-full md:w-auto flex items-center">
           <Input
@@ -37,7 +58,7 @@ export function HeaderSubCategory({
             value={searchInput}
             onChange={handleSearchChange}
             className="pr-8 w-full"
-            onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
+            onKeyDown={(e) => e.key === "Enter" && handleSearchSubmit()}
           />
           {searchInput && (
             <button

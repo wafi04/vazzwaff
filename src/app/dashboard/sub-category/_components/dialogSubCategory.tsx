@@ -6,28 +6,31 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   FormSubCategory,
   FormValuesSubCategory,
-} from '@/types/schema/categories';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { ReactNode, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+} from "@/types/schema/categories";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ReactNode, useState } from "react";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { trpc } from '@/utils/trpc';
-import { useQueryClient } from '@tanstack/react-query';
-import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';
-import { CreateCategory } from '@/schemas/category';
+} from "@/components/ui/select";
+import { useQueryClient } from "@tanstack/react-query";
+import { Label } from "@/components/ui/label";
+import { CreateCategory } from "@/schemas/category";
+import {
+  useDeleteCategory,
+  useFilterCategory,
+} from "../../category/api/server";
+import { useCreateSubCategories, useDeleteSubCategory } from "../api/server";
 
 interface DialogSubCategoryProps {
   children: ReactNode;
@@ -41,40 +44,35 @@ export default function DialogSubCategory({
   onSuccess,
 }: DialogSubCategoryProps) {
   const [open, setOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const queryClient = useQueryClient();
+  const createSub = useCreateSubCategories();
   const isEditing = !!initialData;
-
-  // Get categories for the dropdown
-  const { data: categories } = trpc.sub.getCategories.useQuery();
+  const { data, error, isLoading } = useFilterCategory({
+    status: "active",
+    limit: 100,
+    page: 1,
+  });
 
   const form = useForm<FormValuesSubCategory>({
     resolver: zodResolver(FormSubCategory),
     defaultValues: initialData || {
       active: false,
-      code: '',
-      name: '',
+      code: "",
+      name: "",
       categoryId: undefined,
     },
   });
 
-  
-
-  
-
   function onSubmit() {
-    setIsSubmitting(true);
     const values = form.getValues();
-
-    // if (isEditing && initialData) {
-    //   updateSubCategory({
-    //     id: initialData.id,
-    //     data: values,
-    //   });
-    // } else {
-    //   createSubCategory(values);
-    // }
+    createSub.mutate({
+      name: values.name,
+      code: values.code,
+      categoryId: values.categoryId,
+      active: values.active,
+    });
   }
+
+  const isSubmit = createSub.isPending;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -82,7 +80,7 @@ export default function DialogSubCategory({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? 'Edit Sub Category' : 'Create Sub Category'}
+            {isEditing ? "Edit Sub Category" : "Create Sub Category"}
           </DialogTitle>
         </DialogHeader>
 
@@ -92,7 +90,7 @@ export default function DialogSubCategory({
             <Input
               id="code"
               placeholder="Enter code"
-              {...form.register('code')}
+              {...form.register("code")}
             />
             {form.formState.errors.code && (
               <p className="text-sm text-red-500">
@@ -106,7 +104,7 @@ export default function DialogSubCategory({
             <Input
               id="name"
               placeholder="Enter name"
-              {...form.register('name')}
+              {...form.register("name")}
             />
             {form.formState.errors.name && (
               <p className="text-sm text-red-500">
@@ -120,19 +118,23 @@ export default function DialogSubCategory({
             <Label htmlFor="category">Category</Label>
             <Select
               onValueChange={(value) =>
-                form.setValue('categoryId', Number(value))
+                form.setValue("categoryId", Number(value))
               }
-              defaultValue={initialData?..toString()}
+              defaultValue={initialData?.id.toString()}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent className="max-h-40">
-                {categories?.map((category) => (
-                  <SelectItem key={category.id} value={category.id.toString()}>
-                    {category.nama}
-                  </SelectItem>
-                ))}
+                {data &&
+                  data?.data.categories?.map((category) => (
+                    <SelectItem
+                      key={category.id}
+                      value={category.id.toString()}
+                    >
+                      {category.name}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
             {form.formState.errors.categoryId && (
@@ -146,9 +148,9 @@ export default function DialogSubCategory({
             <Label htmlFor="status">Status</Label>
             <Select
               onValueChange={(value) =>
-                form.setValue('active', value === 'active')
+                form.setValue("active", value === "active")
               }
-              defaultValue={form.getValues('active') ? 'active' : 'inactive'}
+              defaultValue={form.getValues("active") ? "active" : "inactive"}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select status" />
@@ -168,14 +170,14 @@ export default function DialogSubCategory({
             >
               Cancel
             </Button>
-            <Button type="button" onClick={onSubmit} disabled={isSubmitting}>
+            <Button type="button" onClick={onSubmit} disabled={isSubmit}>
               {isEditing
-                ? isSubmitting
-                  ? 'Updating...'
-                  : 'Update'
-                : isSubmitting
-                ? 'Creating...'
-                : 'Create'}
+                ? isSubmit
+                  ? "Updating..."
+                  : "Update"
+                : isSubmit
+                ? "Creating..."
+                : "Create"}
             </Button>
           </div>
         </div>
@@ -191,20 +193,12 @@ export function DialogSubDeleteCategory({
   children: ReactNode;
   id: number;
 }) {
-  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const { mutate, isLoading : isPending } = trpc.sub.delete.useMutation({
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [['sub', 'getSubAll']] });
-      toast.success('Sub category created successfully');
-      setOpen(false);
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to create sub category');
-    },
-  });
-  const handleDelete = async () => {
-    mutate({ id });
+  const deleteSub = useDeleteSubCategory(id);
+
+  const handleDelete = () => {
+    deleteSub.mutate();
+    setOpen(false);
   };
 
   return (
@@ -223,7 +217,7 @@ export function DialogSubDeleteCategory({
             Cancel
           </Button>
           <Button variant="destructive" onClick={handleDelete}>
-            {isPending ? 'laoding...' : 'Delete'}
+            {deleteSub.isPending ? "Deleting..." : "Delete"}
           </Button>
         </DialogFooter>
       </DialogContent>

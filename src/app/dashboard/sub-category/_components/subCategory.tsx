@@ -1,14 +1,26 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { NotFoundItems } from '@/components/ui/not-found-items';
-import { PaginationComponent } from '@/components/ui/pagination-component';
+"use client";
+import { useEffect, useState } from "react";
+import { HeaderSubCategory } from "./header";
+import { useGetSubcategories } from "../api/server";
+import { SkeletonSubCategories } from "@/components/ui/skeleton/skeleton-sub";
+import SubContent from "./table-sub-content";
+import { NotFoundItems } from "@/components/ui/not-found-items";
+import { TablePagination } from "@/features/components/TablePagination";
+import { usePaginationState } from "@/hooks/use-paginate";
 
 export default function SubCategory() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [perPage] = useState(10);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [status, setStatus] = useState("active");
+  const { currentPage, handlePerPageChange, perPage, setCurrentPage } =
+    usePaginationState();
+
+  const { data, isLoading, meta } = useGetSubcategories({
+    limit: perPage,
+    page: currentPage,
+    search: debouncedSearchTerm,
+    active: "active",
+  });
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -18,48 +30,38 @@ export default function SubCategory() {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  const { data, isLoading, isFetching } = trpc.sub.getSubAll.useQuery(
-    {
-      page: currentPage,
-      perPage,
-      search: debouncedSearchTerm,
-    },
-    {
-      retry: 1,
-      gcTime: 10 * 60 * 60,
-      staleTime: 10 * 60 * 60,
-      refetchOnWindowFocus: false,
-    }
-  );
-
   const handleSearchChange = (term: string) => {
     setSearchTerm(term);
     setCurrentPage(1);
   };
 
-  const subCategories = data?.data || [];
-  const pagination = data?.pagination || {
-    totalCount: 0,
-    totalPages: 0,
-    hasNextPage: false,
-    hasPreviousPage: false,
+  const handleStatusChange = (status: string) => {
+    setStatus(status);
+    setCurrentPage(1);
   };
 
   return (
     <main className="space-y-6 p-8">
-      <HeaderSubCategory onSearchChange={handleSearchChange} />
+      <HeaderSubCategory
+        onSearchChange={handleSearchChange}
+        onStatusChange={handleStatusChange}
+      />
 
-      {isLoading || isFetching ? (
+      {isLoading ? (
         <SkeletonSubCategories />
-      ) : subCategories.length > 0 ? (
+      ) : data && data.length > 0 ? (
         <>
-          <SubContent data={subCategories} />
-          <PaginationComponent
-            currentPage={currentPage}
-            perPage={perPage}
-            pagination={pagination}
-            setCurrentPage={setCurrentPage}
-          />
+          <SubContent data={data} />
+          {meta && (
+            <TablePagination
+              currentPage={currentPage}
+              perPage={perPage}
+              totalItems={meta.total}
+              totalPages={meta.totalPages}
+              onPageChange={setCurrentPage}
+              onPerPageChange={handlePerPageChange}
+            />
+          )}
         </>
       ) : (
         <NotFoundItems />
