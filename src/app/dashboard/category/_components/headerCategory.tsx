@@ -27,29 +27,23 @@ export function HeaderCategory({
     string | undefined
   >(undefined);
 
-  // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
   };
 
-  // Handle search submission
   const handleSearchSubmit = () => {
     onSearchChange(searchInput);
   };
 
-  // Handle type filter selection
   const handleTypeSelect = (type: string | undefined) => {
     setActiveTypeFilter(type);
     onTypeChange(type);
   };
 
-  // Handle status filter selection
   const handleStatusSelect = (status: string | undefined) => {
     setActiveStatusFilter(status);
     onStatusChange(status);
   };
-
-  // Clear search
   const handleClearSearch = () => {
     setSearchInput("");
     onSearchChange("");

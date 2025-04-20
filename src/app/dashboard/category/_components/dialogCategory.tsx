@@ -24,29 +24,27 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FormCategory, FormValuesCategory } from "@/types/schema/categories";
-import { ButtonUploadImage } from "@/components/ui/button-upload-image";
-import { uploadToCloudinary } from "@/lib/cloudinary";
-import { Category } from "@/types/category";
 import { toast } from "sonner";
-import { useUpdateCategory } from "../api/server";
-import useCreateCategory from "../api/server";
 import UploadImage from "@/components/ui/uploadimage/upload";
+import { z } from "zod";
+import useCreateCategory, { useUpdateCategory } from "../api/server";
+import { CategoriesData, CreateCategory } from "@/schemas/category";
+
 
 export function DialogCreateCategory({
   children,
-  req,
+  initialData,
 }: {
   children: ReactNode;
-  req?: Category;
+  initialData?: CategoriesData;
 }) {
   const [open, setOpen] = useState<boolean>(false);
-  const create = useCreateCategory();
-  const update = useUpdateCategory(req?.id || 0);
+  const createMutation = useCreateCategory();
+  const updateMutation = useUpdateCategory(initialData?.id || 0);
   const [loadingState, setLoadingState] = useState({
     isSubmitting: false,
     thumbnailLoading: false,
-    bannerLoading: false,
+    logoLoading: false,
   });
 
   const { isSubmitting } = loadingState;
@@ -57,65 +55,56 @@ export function DialogCreateCategory({
     setValue,
     watch,
     formState: { errors },
-  } = useForm<FormValuesCategory>({
-    resolver: zodResolver(FormCategory),
+  } = useForm<CreateCategory>({
+    // resolver: zodResolver(categorySchema),
     defaultValues: {
-      nama: req?.nama || "",
-      subNama: req?.subNama || "",
-      brand: req?.brand || "",
-      kode: req?.kode || "",
-      serverId: req?.serverId || 0,
-      status: req?.status || "",
-      thumbnail: req?.thumbnail ?? "",
-      tipe: req?.tipe ?? "",
-      petunjuk: req?.petunjuk ?? "",
-      ketLayanan: req?.ketLayanan ?? "",
-      ketId: req?.ketId ?? "",
-      placeholder1: req?.placeholder1 ?? "",
-      placeholder2: req?.placeholder2 ?? "",
-      bannerLayanan: req?.bannerLayanan ?? "",
+      name: initialData?.name || "",
+      subName: initialData?.subName || "",
+      brand: initialData?.brand || "",
+      code: initialData?.code || "",
+      serverId: initialData?.serverId || 0,
+      status: initialData?.status || "",
+      thumbnail: initialData?.thumbnail || "",
+      type: initialData?.type || "",
+      petunjuk: initialData?.petunjuk || "",
+      ketLayanan: initialData?.ketLayanan || "",
+      ketId: initialData?.ketId || "",
+      placeholder1: initialData?.placeholder1 || "",
+      placeholder2: initialData?.placeholder2 || "",
+      logo: initialData?.logo || "",
     },
   });
 
   // Get current values
   const thumbnailUrl = watch("thumbnail");
-  const bannerLayananUrl = watch("bannerLayanan");
+  const logoUrl = watch("logo");
 
-  // Improved thumbnail upload handler
+  const handleImageUpload = (field: "thumbnail" | "logo", value: string) => {
+    setLoadingState(prev => ({ 
+      ...prev, 
+      [field === "thumbnail" ? "thumbnailLoading" : "logoLoading"]: false 
+    }));
+    setValue(field, value);
+  };
 
-  const onSubmit = async (data: FormValuesCategory) => {
-    setLoadingState((prev) => ({ ...prev, isSubmitting: true }));
+  const onSubmit = async (data: CreateCategory) => {
+    setLoadingState(prev => ({ ...prev, isSubmitting: true }));
+    
     try {
-      if (req) {
+      if (initialData) {
         // Update existing category
-        update.mutate(data);
-        toast.success("Kategori berhasil diperbarui");
+        updateMutation.mutate(data);
       } else {
         // Create new category
-        create.mutate({
-          bannerLayanan: data.bannerLayanan,
-          ketId: data.ketId ?? "",
-          ketLayanan: data.ketLayanan ?? "",
-          code: data.kode ?? "",
-          brand: data.brand ?? "",
-          petunjuk: data.petunjuk ?? "",
-          name: data.nama,
-          placeholder1: data.placeholder1,
-          placeholder2: data.placeholder2,
-          serverId: data.serverId,
-          status: data.status,
-          subNama: data.subNama,
-          thumbnail: data.thumbnail,
-          tipe: data.tipe,
-        });
-        toast.success("Kategori berhasil ditambahkan");
+        createMutation.mutate(data);
       }
       setOpen(false);
       reset();
     } catch (error) {
-      toast.error("Gagal menyimpan kategori");
+      const errorMessage = error instanceof Error ? error.message : "Terjadi kesalahan saat menyimpan kategori";
+      toast.error(errorMessage);
     } finally {
-      setLoadingState((prev) => ({ ...prev, isSubmitting: false }));
+      setLoadingState(prev => ({ ...prev, isSubmitting: false }));
     }
   };
 
@@ -124,9 +113,9 @@ export function DialogCreateCategory({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Tambah Kategori Baru</DialogTitle>
+          <DialogTitle>{initialData ? "Edit Kategori" : "Tambah Kategori Baru"}</DialogTitle>
           <DialogDescription>
-            Isi form berikut untuk menambahkan kategori baru.
+            Isi form berikut untuk {initialData ? "mengubah" : "menambahkan"} kategori.
           </DialogDescription>
         </DialogHeader>
 
@@ -142,15 +131,15 @@ export function DialogCreateCategory({
             <TabsContent value="basic" className="space-y-4 mt-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="nama">Nama Kategori</Label>
+                  <Label htmlFor="name">Nama Kategori</Label>
                   <Input
-                    id="nama"
+                    id="name"
                     placeholder="Masukkan nama kategori"
-                    {...register("nama")}
+                    {...register("name")}
                   />
-                  {errors.nama && (
+                  {errors.name && (
                     <p className="text-sm font-medium text-destructive">
-                      {errors.nama.message}
+                      {errors.name.message}
                     </p>
                   )}
                 </div>
@@ -160,11 +149,11 @@ export function DialogCreateCategory({
                   <Input
                     id="subName"
                     placeholder="Masukkan sub nama"
-                    {...register("subNama")}
+                    {...register("subName")}
                   />
-                  {errors.subNama && (
+                  {errors.subName && (
                     <p className="text-sm font-medium text-destructive">
-                      {errors.subNama.message}
+                      {errors.subName.message}
                     </p>
                   )}
                 </div>
@@ -186,15 +175,15 @@ export function DialogCreateCategory({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="kode">Kode</Label>
+                  <Label htmlFor="code">Kode</Label>
                   <Input
-                    id="kode"
+                    id="code"
                     placeholder="Masukkan kode (opsional)"
-                    {...register("kode")}
+                    {...register("code")}
                   />
-                  {errors.kode && (
+                  {errors.code && (
                     <p className="text-sm font-medium text-destructive">
-                      {errors.kode.message}
+                      {errors.code.message}
                     </p>
                   )}
                 </div>
@@ -204,10 +193,10 @@ export function DialogCreateCategory({
                 <div className="space-y-2">
                   <Label htmlFor="type">Tipe</Label>
                   <Select
-                    onValueChange={(value) => setValue("tipe", value)}
-                    value={watch("tipe")}
+                    onValueChange={(value) => setValue("type", value)}
+                    defaultValue={watch("type")}
                   >
-                    <SelectTrigger id="tipe">
+                    <SelectTrigger id="type">
                       <SelectValue placeholder="Pilih tipe kategori" />
                     </SelectTrigger>
                     <SelectContent>
@@ -216,9 +205,9 @@ export function DialogCreateCategory({
                       <SelectItem value="pulsa">Pulsa</SelectItem>
                     </SelectContent>
                   </Select>
-                  {errors.tipe && (
+                  {errors.type && (
                     <p className="text-sm font-medium text-destructive">
-                      {errors.tipe.message}
+                      {errors.type.message}
                     </p>
                   )}
                 </div>
@@ -227,7 +216,7 @@ export function DialogCreateCategory({
                   <Label htmlFor="status">Status</Label>
                   <Select
                     onValueChange={(value) => setValue("status", value)}
-                    value={watch("status")}
+                    defaultValue={watch("status")}
                   >
                     <SelectTrigger id="status">
                       <SelectValue placeholder="Pilih status" />
@@ -248,7 +237,11 @@ export function DialogCreateCategory({
 
               <div className="space-y-2">
                 <Label htmlFor="serverId">Server ID</Label>
-                <Input id="serverId" type="number" {...register("serverId")} />
+                <Input 
+                  id="serverId" 
+                  type="number" 
+                  {...register("serverId", { valueAsNumber: true })}
+                />
                 {errors.serverId && (
                   <p className="text-sm font-medium text-destructive">
                     {errors.serverId.message}
@@ -264,7 +257,7 @@ export function DialogCreateCategory({
                 <div className="mt-2">
                   <UploadImage
                     value={thumbnailUrl}
-                    onChange={(value) => setValue("thumbnail", value)}
+                    onChange={(value) => handleImageUpload("thumbnail", value)}
                   />
                 </div>
                 {errors.thumbnail && (
@@ -275,16 +268,17 @@ export function DialogCreateCategory({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="bannerLayanan">Banner Layanan</Label>
+                <Label htmlFor="logo">Banner Layanan</Label>
                 <div className="mt-2">
                   <UploadImage
-                    value={bannerLayananUrl}
-                    onChange={(value) => setValue("bannerLayanan", value)}
+                    value={logoUrl}
+                    onChange={(value) => handleImageUpload("logo", value)}
+                    
                   />
                 </div>
-                {errors.bannerLayanan && (
+                {errors.logo && (
                   <p className="text-sm font-medium text-destructive">
-                    {errors.bannerLayanan.message}
+                    {errors.logo.message}
                   </p>
                 )}
               </div>
@@ -323,9 +317,9 @@ export function DialogCreateCategory({
             {/* Additional Information Tab */}
             <TabsContent value="additional" className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label htmlFor="instruction">Petunjuk</Label>
+                <Label htmlFor="petunjuk">Petunjuk</Label>
                 <Textarea
-                  id="instruction"
+                  id="petunjuk"
                   placeholder="Masukkan petunjuk penggunaan (opsional)"
                   className="min-h-[100px]"
                   {...register("petunjuk")}
@@ -382,7 +376,7 @@ export function DialogCreateCategory({
             </Button>
             <Button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || loadingState.thumbnailLoading || loadingState.logoLoading}
               className="w-full sm:w-auto"
             >
               {isSubmitting ? (

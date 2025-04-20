@@ -1,64 +1,67 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { HeaderCategory } from "./headerCategory";
 import MainLayout from "@/components/layouts/mainlayout";
+import { useFilterState } from "@/hooks/use-filter";
+import { usePaginationState } from "@/hooks/use-paginate";
+import { useEffect } from "react";
+import { HeaderCategory } from "./headerCategory";
 import { useFilterCategory } from "../api/server";
-import { FilterCategory } from "@/schemas/category";
+import { Filter } from "@/schemas/types";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Eye, Pencil, Trash2 } from "lucide-react";
+import { TablePagination } from "@/features/components/TablePagination";
 
 export function DashboardProductCategory() {
-  // State untuk filter
-  const [searchTerm, setSearchTerm] = useState("");
-  const [typeFilter, setTypeFilter] = useState<string | undefined>(undefined);
-  const [statusFilter, setStatusFilter] = useState<string | undefined>(
-    undefined
-  );
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const {
+    debouncedSearchTerm,
+    typeFilter,
+    statusFilter,
+    handleSearchChange,
+    handleTypeChange,
+    handleStatusChange
+  } = useFilterState();
 
-  // State untuk pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const [perPage, setPerPage] = useState(10);
+  const {
+    currentPage,
+    perPage,
+    setCurrentPage,
+    handlePerPageChange
+  } = usePaginationState();
 
-  // Debounce search input
+  const getFilterParams = () => {
+    const filterParams: Filter = {};
+
+    if (debouncedSearchTerm) filterParams.search = debouncedSearchTerm;
+    if (typeFilter) filterParams.type = typeFilter;
+    if (statusFilter === "active") filterParams.active = "1";
+    if (statusFilter === "unactive") filterParams.active = "0";
+    if (statusFilter === "draft") filterParams.status = "draft";
+
+    filterParams.page = currentPage;
+    filterParams.limit = perPage;
+
+    return filterParams;
+  };
+
+  const { data, isLoading, error } = useFilterCategory(getFilterParams());
+
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 500);
-
-    return () => clearTimeout(handler);
-  }, [searchTerm]);
-
-  // Menyiapkan parameter filter
-  const filterParams: FilterCategory = {};
-
-  // Hanya tambahkan parameter jika ada nilainya
-  if (debouncedSearchTerm) filterParams.search = debouncedSearchTerm;
-  if (typeFilter) filterParams.type = typeFilter;
-  if (statusFilter === "active") filterParams.active = "1";
-  if (statusFilter === "unactive") filterParams.active = "0";
-  if (statusFilter === "draft") filterParams.status = "draft";
-
-  // Selalu sertakan parameter pagination
-  filterParams.page = currentPage;
-  filterParams.limit = perPage;
-
-  // Gunakan filter hook dengan parameter yang sudah disiapkan
-  const { data, isLoading, error } = useFilterCategory(filterParams);
-
-  // Handler untuk HeaderCategory
-  const handleSearchChange = (term: string) => {
-    setSearchTerm(term);
     setCurrentPage(1);
-  };
+  }, [debouncedSearchTerm, typeFilter, statusFilter]);
 
-  const handleTypeChange = (type: string | undefined) => {
-    setTypeFilter(type);
-    setCurrentPage(1);
-  };
-
-  const handleStatusChange = (status: string | undefined) => {
-    setStatusFilter(status);
-    setCurrentPage(1);
+  // Helper function to format type
+  const formatType = (type: string) => {
+    return type.charAt(0).toUpperCase() + type.slice(1);
   };
 
   return (
@@ -69,7 +72,7 @@ export function DashboardProductCategory() {
           onStatusChange={handleStatusChange}
           onTypeChange={handleTypeChange}
         />
-
+        
         {isLoading ? (
           <div className="flex justify-center py-8">
             <div className="animate-pulse">Memuat data kategori...</div>
@@ -91,9 +94,83 @@ export function DashboardProductCategory() {
               </div>
             ) : (
               <div className="space-y-4">
-                <pre className="p-4 bg-muted rounded-md overflow-auto">
-                  {JSON.stringify(data, null, 2)}
-                </pre>
+                <div className="rounded-md border">
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-12">No.</TableHead>
+                          <TableHead className="w-14">Logo</TableHead>
+                          <TableHead>Nama Kategori</TableHead>
+                          <TableHead className="hidden md:table-cell">Kode</TableHead>
+                          <TableHead className="hidden lg:table-cell">Deskripsi</TableHead>
+                          <TableHead className="hidden sm:table-cell">Tipe</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead className="text-right">Aksi</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {data.data.categories.map((category, index) => (
+                          <TableRow key={category.name}>
+                            <TableCell className="font-medium">
+                              {(currentPage - 1) * perPage + index + 1}
+                            </TableCell>
+                            <TableCell>
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage src={category.logo} alt={category.name} />
+                                <AvatarFallback>
+                                  {category.name.substring(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                            </TableCell>
+                            <TableCell className="font-medium">{category.name}</TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              <span className="text-xs">{category.code}</span>
+                            </TableCell>
+                            <TableCell className="hidden lg:table-cell max-w-xs">
+                              <span className="text-sm line-clamp-1">{category.subName}</span>
+                            </TableCell>
+                            <TableCell className="hidden sm:table-cell">
+                              <span>{formatType(category.type)}</span>
+                            </TableCell>
+                            <TableCell>
+                              <Badge 
+                                variant={category.status === "active" ? "default" : "secondary"}
+                                className={category.status === "active" ? "bg-green-100 text-green-800 hover:bg-green-100" : ""}
+                              >
+                                {category.status === "active" ? "Aktif" : "Draft"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button variant="ghost" size="icon" title="Lihat">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon" title="Edit">
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon" title="Hapus">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+
+                {data?.data?.meta && (
+                  <TablePagination
+                    currentPage={currentPage}
+                    perPage={perPage}
+                    totalItems={data.data.meta.total}
+                    totalPages={data.data.meta.totalPages}
+                    onPageChange={setCurrentPage}
+                    onPerPageChange={handlePerPageChange}
+                  />
+                )}
               </div>
             )}
           </div>
