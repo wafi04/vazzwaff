@@ -65,7 +65,7 @@ export function AuthProvider({
   
   // Handle role-based access
   if (!isLoading && user) {
-    if (requireAdmin && user.role !== "Admin") {
+    if (requireAdmin && user.role !== "ADMIN") {
       router.replace(redirectTo);
       return <LoadingOverlay />;
     }

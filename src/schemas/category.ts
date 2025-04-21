@@ -1,5 +1,5 @@
 import { Pagination } from "./reponse";
-
+export type CategoryType = "gamelainnya"  | "populer"  | "voucher"   | "pulsa"  | "pln"
 export interface CreateCategory {
   name: string;
   subName: string;
@@ -9,9 +9,8 @@ export interface CreateCategory {
   status: string;
   thumbnail: string;
   type: string;
-  petunjuk: string;
-  ketLayanan: string;
-  ketId: string;
+  instructions: string;
+  description: string;
   placeholder1: string;
   placeholder2: string;
   logo: string;

@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DialogCreateCategory } from "./dialogCategory";
+import { dataCategoryType } from "@/data/data-category";
 
 export function HeaderCategory({
   onSearchChange,
@@ -51,7 +52,7 @@ export function HeaderCategory({
 
   return (
     <section className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4 mb-6">
-      <h1 className="text-2xl font-bold text-card-foreground">Kategori</h1>
+      <h1 className="text-2xl font-bold text-card-foreground">Categories</h1>
       <div className="flex flex-row items-start md:items-center gap-4 w-full md:w-auto">
         {/* Search input with button */}
         <div className="relative w-full md:w-auto flex items-center">
@@ -96,21 +97,13 @@ export function HeaderCategory({
             <DropdownMenuItem onClick={() => handleTypeSelect(undefined)}>
               Semua Tipe
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleTypeSelect("gamelainnya")}>
-              Game
+            {
+              dataCategoryType.map((cat) => (
+            <DropdownMenuItem key={cat.type} onClick={() => handleTypeSelect(cat.type)}>
+              {cat.name}
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleTypeSelect("popular")}>
-              Popular
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleTypeSelect("voucher")}>
-              Voucher
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleTypeSelect("pulsa")}>
-              Pulsa
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleTypeSelect("pln")}>
-              Pln
-            </DropdownMenuItem>
+              ))
+            }
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -134,7 +127,7 @@ export function HeaderCategory({
               Aktif
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleStatusSelect("unactive")}>
-              Nonaktif
+              Tidak Aktif
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

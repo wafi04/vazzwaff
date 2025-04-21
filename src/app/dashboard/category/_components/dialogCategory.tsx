@@ -21,14 +21,13 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { type ReactNode, useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import UploadImage from "@/components/ui/uploadimage/upload";
-import { z } from "zod";
 import useCreateCategory, { useUpdateCategory } from "../api/server";
 import { CategoriesData, CreateCategory } from "@/schemas/category";
+import { dataCategoryType } from "@/data/data-category";
 
 
 export function DialogCreateCategory({
@@ -46,6 +45,7 @@ export function DialogCreateCategory({
     thumbnailLoading: false,
     logoLoading: false,
   });
+
 
   const { isSubmitting } = loadingState;
   const {
@@ -66,9 +66,8 @@ export function DialogCreateCategory({
       status: initialData?.status || "",
       thumbnail: initialData?.thumbnail || "",
       type: initialData?.type || "",
-      petunjuk: initialData?.petunjuk || "",
-      ketLayanan: initialData?.ketLayanan || "",
-      ketId: initialData?.ketId || "",
+      instructions: initialData?.instructions || "",
+      description: initialData?.description || "",
       placeholder1: initialData?.placeholder1 || "",
       placeholder2: initialData?.placeholder2 || "",
       logo: initialData?.logo || "",
@@ -200,9 +199,11 @@ export function DialogCreateCategory({
                       <SelectValue placeholder="Pilih tipe kategori" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="gamelainnya">Game</SelectItem>
-                      <SelectItem value="voucher">Voucher</SelectItem>
-                      <SelectItem value="pulsa">Pulsa</SelectItem>
+                      {
+                        dataCategoryType.map((cat) => (
+                          <SelectItem value={cat.type} key={cat.type}>{cat.name}</SelectItem>
+                        ))
+                     }
                     </SelectContent>
                   </Select>
                   {errors.type && (
@@ -317,48 +318,36 @@ export function DialogCreateCategory({
             {/* Additional Information Tab */}
             <TabsContent value="additional" className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label htmlFor="petunjuk">Petunjuk</Label>
+                <Label htmlFor="instructions">Petunjuk</Label>
                 <Textarea
-                  id="petunjuk"
-                  placeholder="Masukkan petunjuk penggunaan (opsional)"
+                  id="instructions"
+                  placeholder="Masukkan intructions penggunaan (opsional)"
                   className="min-h-[100px]"
-                  {...register("petunjuk")}
+                  {...register("instructions")}
                 />
-                {errors.petunjuk && (
+                {errors.instructions && (
                   <p className="text-sm font-medium text-destructive">
-                    {errors.petunjuk.message}
+                    {errors.instructions.message}
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="ketLayanan">Keterangan Layanan</Label>
+                <Label htmlFor="description">Description</Label>
                 <Textarea
-                  id="ketLayanan"
+                  id="description"
                   placeholder="Masukkan keterangan layanan (opsional)"
                   className="min-h-[100px]"
-                  {...register("ketLayanan")}
+                  {...register("description")}
                 />
-                {errors.ketLayanan && (
+                {errors.description && (
                   <p className="text-sm font-medium text-destructive">
-                    {errors.ketLayanan.message}
+                    {errors.description.message}
                   </p>
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="ketId">Keterangan ID</Label>
-                <Input
-                  id="ketId"
-                  placeholder="Masukkan keterangan ID (opsional)"
-                  {...register("ketId")}
-                />
-                {errors.ketId && (
-                  <p className="text-sm font-medium text-destructive">
-                    {errors.ketId.message}
-                  </p>
-                )}
-              </div>
+            
             </TabsContent>
           </Tabs>
 

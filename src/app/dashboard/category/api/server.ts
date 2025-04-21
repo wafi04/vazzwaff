@@ -61,7 +61,7 @@ export function useUpdateCategory(id: number) {
 
 export function useFilterCategory(req: FilterCategory) {
   const { data, error, isLoading } = useQuery({
-    queryKey: ["categories"],
+    queryKey: ["categories",req],
     queryFn: async () => {
       const request = await api.get<ApiResponse<CategoryResponse>>(
         "/categories",

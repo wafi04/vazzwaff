@@ -23,7 +23,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // If no token exists, redirect to login
   const sessionToken = request.cookies.get("session_token")?.value;
 
   if (!sessionToken) {
@@ -44,15 +43,15 @@ export async function middleware(request: NextRequest) {
       // Check role-based access
       if (
         ADMIN_ROUTE.some((route) => pathname.startsWith(route)) &&
-        userRole !== "Admin"
+        userRole !== "ADMIN"
       ) {
         return NextResponse.redirect(new URL(REDIRECT, request.url));
       }
 
       if (
         MEMBER_ROUTE.some((route) => pathname.startsWith(route)) &&
-        userRole !== "Member" &&
-        userRole !== "Admin"
+        userRole !== "MEMBER" &&
+        userRole !== "ADMIN"
       ) {
         return NextResponse.redirect(new URL(REDIRECT, request.url));
       }

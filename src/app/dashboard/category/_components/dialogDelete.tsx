@@ -7,8 +7,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { ReactNode } from "react";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useDeleteCategory } from "../api/server";
 
 export function DialogDeleteCategory({
   children,
@@ -17,10 +16,9 @@ export function DialogDeleteCategory({
   children: ReactNode;
   id: number;
 }) {
-  const { refresh } = useRouter();
+  const deleted = useDeleteCategory()
   const handleDelete = async () => {
-    refresh();
-    toast.success("Category deleted successfully");
+    deleted.mutate(id)
   };
 
   return (
