@@ -1,90 +1,132 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { PlusIcon, SearchIcon, XIcon } from "lucide-react";
-import { JSX, useState } from "react";
+import { 
+  Sheet, 
+  SheetContent, 
+  SheetDescription, 
+  SheetHeader, 
+  SheetTitle, 
+  SheetTrigger 
+} from "@/components/ui/sheet";
+import { FilterIcon, PlusIcon} from "lucide-react";
 import DialogSubCategory from "./dialogSubCategory";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-export function HeaderSubCategory({
-  onSearchChange,
-  onStatusChange,
-}: {
+import { useFilterCategory } from "../../category/api/server";
+import { SearchBar } from "@/components/ui/searchbar";
+import { StatusFilter } from "@/components/ui/statusFilter";
+import { HeaderSection } from "@/components/layouts/header-dashboard";
+import { MobileFilters } from "./mobile-filter";
+import { CategoriesData } from "@/schemas/category";
+import { CategoryFilter } from "../../category/_components/category-filter";
+
+
+interface HeaderSubCategoryProps {
   onStatusChange: (status: string) => void;
   onSearchChange: (term: string) => void;
-}): JSX.Element {
-  const [searchInput, setSearchInput] = useState("");
+  onCategoryChange: (categoryId: number) => void;
+}
+
+export const HeaderSubCategory: React.FC<HeaderSubCategoryProps> = ({
+  onSearchChange,
+  onStatusChange,
+  onCategoryChange
+}) => {
+  const [searchInput, setSearchInput] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<string>("active");
+  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
+
+  const { data: categoryData, isLoading: loadingCategories } = useFilterCategory({
+    all: "all"
+  });
+  
+  const categories: CategoriesData[] = categoryData?.data?.categories || [];
 
   // Handle search input change
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSearchInput(e.target.value);
   };
 
-  // Handle search submission
-  const handleSearchSubmit = () => {
+  const handleSearchSubmit = (): void => {
     onSearchChange(searchInput);
   };
 
-  // Clear search
-  const handleClearSearch = () => {
+  const handleStatusChange = (value: string): void => {
+    setSelectedStatus(value);
+    onStatusChange(value);
+  };
+
+  const handleCategoryChange = (value: string): void => {
+    setSelectedCategory(value);
+    onCategoryChange(Number(value));
+  };
+
+  const handleClearSearch = (): void => {
     setSearchInput("");
     onSearchChange("");
   };
 
   return (
-    <section className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4 mb-6">
-      <h1 className="text-2xl font-bold text-card-foreground">Sub Category</h1>
-      <div className="flex flex-col md:flex-row items-start md:items-center gap-4 w-full md:w-auto">
-        {/* Status dropdown */}
-        <Select onValueChange={onStatusChange} defaultValue="active">
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
-            <SelectItem value="all">All</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* Search input with button */}
-        <div className="relative w-full md:w-auto flex items-center">
-          <Input
-            placeholder="Cari kategori..."
-            value={searchInput}
-            onChange={handleSearchChange}
-            className="pr-8 w-full"
-            onKeyDown={(e) => e.key === "Enter" && handleSearchSubmit()}
-          />
-          {searchInput && (
-            <button
-              onClick={handleClearSearch}
-              className="absolute right-10 text-gray-500 hover:text-gray-700"
-            >
-              <XIcon className="h-4 w-4" />
-            </button>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-1"
-            onClick={handleSearchSubmit}
-          >
-            <SearchIcon className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <DialogSubCategory>
+    <section className="w-full space-y-4">
+      {/* Title and Add Button Row */}
+      <HeaderSection title="Sub Category">
+         <DialogSubCategory>
           <Button className="flex items-center gap-2">
             <PlusIcon className="h-4 w-4" />
-            <span className="hidden md:inline">Tambah</span>
+            <span className="hidden sm:inline">Tambah</span>
           </Button>
         </DialogSubCategory>
+      </HeaderSection>
+      
+      {/* Filters Row */}
+      <div className="flex flex-col sm:flex-row gap-3 w-full">
+        {/* Search input - takes more space on larger screens */}
+        <SearchBar 
+          value={searchInput}
+          onChange={handleSearchChange}
+          onSubmit={handleSearchSubmit}
+          onClear={handleClearSearch}
+        />
+
+        {/* Desktop Filters */}
+        <div className="hidden sm:flex gap-3">
+          <CategoryFilter 
+            value={selectedCategory} 
+            onChange={handleCategoryChange} 
+            categories={categories}
+            isLoading={loadingCategories} 
+          />
+
+          <StatusFilter 
+            value={selectedStatus} 
+            onChange={handleStatusChange} 
+          />
+        </div>
+
+        {/* Mobile Filter Button */}
+        <div className="sm:hidden">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="icon" className="h-10 w-10">
+                <FilterIcon className="h-4 w-4" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right">
+              <SheetHeader>
+                <SheetTitle>Filters</SheetTitle>
+                <SheetDescription>
+                  Apply filters to refine your subcategories
+                </SheetDescription>
+              </SheetHeader>
+              <MobileFilters 
+                selectedCategory={selectedCategory}
+                handleCategoryChange={handleCategoryChange}
+                selectedStatus={selectedStatus}
+                handleStatusChange={handleStatusChange}
+                categories={categories}
+              />
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </section>
   );
-}
+};

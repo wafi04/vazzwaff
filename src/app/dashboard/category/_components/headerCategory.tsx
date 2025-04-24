@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { FilterIcon, PlusIcon, SearchIcon, XIcon } from "lucide-react";
+import { FilterIcon, PlusIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,6 +9,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DialogCreateCategory } from "./dialogCategory";
 import { dataCategoryType } from "@/data/data-category";
+import { SearchBar } from "@/components/ui/searchbar";
+import { StatusFilter } from "@/components/ui/statusFilter";
 
 export function HeaderCategory({
   onSearchChange,
@@ -55,31 +56,7 @@ export function HeaderCategory({
       <h1 className="text-2xl font-bold text-card-foreground">Categories</h1>
       <div className="flex flex-row items-start md:items-center gap-4 w-full md:w-auto">
         {/* Search input with button */}
-        <div className="relative w-full md:w-auto flex items-center">
-          <Input
-            placeholder="Cari kategori..."
-            value={searchInput}
-            onChange={handleSearchChange}
-            className="pr-8 w-full"
-            onKeyDown={(e) => e.key === "Enter" && handleSearchSubmit()}
-          />
-          {searchInput && (
-            <button
-              onClick={handleClearSearch}
-              className="absolute right-10 text-gray-500 hover:text-gray-700"
-            >
-              <XIcon className="h-4 w-4" />
-            </button>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-1"
-            onClick={handleSearchSubmit}
-          >
-            <SearchIcon className="h-4 w-4" />
-          </Button>
-        </div>
+        <SearchBar onChange={handleSearchChange} onClear={handleClearSearch} onSubmit={handleSearchSubmit} value={searchInput} />
 
         {/* Type filter dropdown */}
         <DropdownMenu>
@@ -106,32 +83,7 @@ export function HeaderCategory({
             }
           </DropdownMenuContent>
         </DropdownMenu>
-
-        {/* Status filter dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant={activeStatusFilter ? "default" : "outline"}
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <FilterIcon className="h-4 w-4" />
-              <span>{activeStatusFilter || "Status"}</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleStatusSelect(undefined)}>
-              Semua Status
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleStatusSelect("active")}>
-              Aktif
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleStatusSelect("unactive")}>
-              Tidak Aktif
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
+        <StatusFilter onChange={handleStatusSelect} value={activeStatusFilter ?? "active"} />
         <DialogCreateCategory>
           <Button className="flex items-center gap-2 h-8">
             <PlusIcon className="h-3 w-3" />

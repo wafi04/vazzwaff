@@ -6,7 +6,6 @@ import {
   UpdateSubCategory,
 } from "@/schemas/category";
 import { ApiResponse } from "@/types/response";
-// import { CreateSubCategories } from "@/schemas/category";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -38,7 +37,7 @@ export function useCreateSubCategories() {
 
 export function useGetSubcategories(req: FilterSubcategory) {
   const { data, error, isLoading } = useQuery({
-    queryKey: ["subCategory"],
+    queryKey: ["subCategory",req],
     queryFn: async () => {
       const request = await api.get<ApiResponse<SubCategoryResponse>>(
         "/subcategories",
@@ -50,8 +49,6 @@ export function useGetSubcategories(req: FilterSubcategory) {
     staleTime: 1000 * 60 * 60 * 24,
     refetchOnWindowFocus: false,
   });
-
-  console.log(data);
 
   return {
     data: data?.data.data ?? [],

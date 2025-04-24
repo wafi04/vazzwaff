@@ -1,5 +1,4 @@
-
-export default function ProfileComponent() {
+export default function HomePage() {
   return (
     <main></main>
   );

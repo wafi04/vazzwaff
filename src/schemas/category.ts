@@ -29,6 +29,7 @@ export type FilterCategory = {
   type?: string;
   page?: number;
   limit?: number;
+  all?  : string
   active?: string;
   status?: string;
 };

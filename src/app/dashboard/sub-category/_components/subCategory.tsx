@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { HeaderSubCategory } from "./header";
 import { useGetSubcategories } from "../api/server";
 import { SkeletonSubCategories } from "@/components/ui/skeleton/skeleton-sub";
@@ -7,28 +7,32 @@ import SubContent from "./table-sub-content";
 import { NotFoundItems } from "@/components/ui/not-found-items";
 import { TablePagination } from "@/features/components/TablePagination";
 import { usePaginationState } from "@/hooks/use-paginate";
+import { useFilterCategoryState } from "@/hooks/use-sub-categories";
 
 export default function SubCategory() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [status, setStatus] = useState("active");
+  const {
+    searchInput, active, categoryId,
+    setSearchTerm, setActive, setCategoryId
+  } = useFilterCategoryState();
+  
   const { currentPage, handlePerPageChange, perPage, setCurrentPage } =
     usePaginationState();
 
   const { data, isLoading, meta } = useGetSubcategories({
     limit: perPage,
     page: currentPage,
-    search: debouncedSearchTerm,
-    active: "active",
+    search: searchInput,
+    active,
+    categoryId: categoryId || undefined,
   });
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
+      setSearchTerm(searchInput ?? "");
     }, 500);
 
     return () => clearTimeout(handler);
-  }, [searchTerm]);
+  }, [searchInput, setSearchTerm]);
 
   const handleSearchChange = (term: string) => {
     setSearchTerm(term);
@@ -36,7 +40,13 @@ export default function SubCategory() {
   };
 
   const handleStatusChange = (status: string) => {
-    setStatus(status);
+    setActive(status);
+    setCurrentPage(1);
+  };
+
+  const handleCategoryChange = (id: number) => {
+    // If id is 0, it means "All Categories" was selected
+    setCategoryId(id === 0 ? undefined : id);
     setCurrentPage(1);
   };
 
@@ -45,6 +55,7 @@ export default function SubCategory() {
       <HeaderSubCategory
         onSearchChange={handleSearchChange}
         onStatusChange={handleStatusChange}
+        onCategoryChange={handleCategoryChange}
       />
 
       {isLoading ? (
