@@ -35,13 +35,12 @@ export default function RootLayout({
     <html lang="en">
     		<link rel="icon" href={URL_LOGO || "/favicon.ico"} sizes="any" />
       <ReactQueryProvider>
-        
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-        {children}
-        <Toaster />
-      </body>
+          <body
+            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+            >
+            {children}
+            <Toaster />
+          </body>
         </ReactQueryProvider>
     </html>
   );

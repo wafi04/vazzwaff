@@ -50,7 +50,7 @@ export const DesktopSidebar = ({
     </div>
 
     {/* Footer */}
-
+        
     {user && (
       <div className="border-t border-t-sidebar-border p-4 flex items-center gap-2 text-sidebar-foreground">
         <AuthDropdown user={user} />

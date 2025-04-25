@@ -58,16 +58,14 @@ export function AuthProvider({
   // Handle unauthorized access
   if (error && error.message === "UNAUTHORIZED") {
     if (requireUser || requireAdmin) {
-      router.replace(redirectTo);
-      return <LoadingOverlay />;
+      return router.replace(redirectTo);
     }
   }
   
   // Handle role-based access
   if (!isLoading && user) {
     if (requireAdmin && user.role !== "ADMIN") {
-      router.replace(redirectTo);
-      return <LoadingOverlay />;
+      return router.replace(redirectTo);
     }
   }
 

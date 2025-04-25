@@ -4,7 +4,7 @@ import { api } from "./lib/axios";
 import { ROLE_USER } from "./constants";
 
 export const REDIRECT = "/auth/login";
-export const PUBLIC_ROUTES = ["/"];
+export const PUBLIC_ROUTES = ["/auth/login"];
 export const MEMBER_ROUTE = ["/profile"];
 export const ADMIN_ROUTE = ["/dashboard"];
 export const AUTH_ROUTES = [

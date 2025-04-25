@@ -7,9 +7,12 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { Sidebar } from './sidebar';
 import { User } from '@/types/schema/user';
+import { ButtonCart } from '@/app/(main)/cart/buttonCart';
+import { useGetCart } from '@/app/(main)/order/server';
 
 export function Navbar({ user }: { user?: User }) {
   const [openSidebar, setOpenSidebar] = useState<boolean>(false);
+  const {data,isLoading}  = useGetCart()
   return (
     <>
       <nav className="w-full h-16 px-4 py-3 backdrop-blur-sm sticky top-0 left-0 z-40 text-white">
@@ -42,6 +45,11 @@ export function Navbar({ user }: { user?: User }) {
             </Link>
           </div>
           {/* <AuthDropdown user={user} /> */}
+          {
+             !isLoading && data &&  (
+              <ButtonCart amount={data.amountItems}/>
+            )
+          }
         </div>
       </nav>
 

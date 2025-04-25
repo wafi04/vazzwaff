@@ -1,4 +1,4 @@
-import { CategoriesData } from "./category";
+import { CategoriesData, SubCategoryData } from "./category";
 import { Pagination } from "./reponse";
 
 export interface ProductsReponse {
@@ -53,4 +53,16 @@ export type FilterProduct = {
     categoryId?: number  
     sortPriceDesc?: boolean  
     sortPriceAsc?: boolean   
+}
+
+export type CategoryWithProduct =  CategoriesData & {
+  products: ProductsData[]
+  subCategories : SubCategoryData[]
+}
+
+export interface FilterProductByCategory {
+  code: string;
+  price?: string
+  subcategory?: string;
+  role?:  string
 }

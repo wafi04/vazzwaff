@@ -1,5 +1,5 @@
 import { api } from "@/lib/axios";
-import { FilterProduct, ProductsReponse } from "@/schemas/products";
+import { CategoryWithProduct, FilterProduct, FilterProductByCategory, ProductsReponse } from "@/schemas/products";
 import { ApiResponse } from "@/types/response";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -42,3 +42,22 @@ export function useGetProduct(req?: FilterProduct) {
         error
     }
 }
+export function useGetProductByCategoryCode(req?: FilterProductByCategory) {
+    const { data,isLoading,error} = useQuery({
+        queryKey: ["product","category",req],
+        queryFn: async () => {
+            const data = await api.get<ApiResponse<CategoryWithProduct>>("/products/category/code",req)
+            return data
+        },
+        gcTime: 24 * 60 * 60 * 1000,
+        staleTime: 24 * 60 * 60 * 1000,
+        refetchOnWindowFocus: false,
+    }) 
+
+    return {
+        data : data?.data.data,
+        isLoading,
+        error
+    }
+}
+
