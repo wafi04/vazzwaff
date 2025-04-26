@@ -1,64 +1,58 @@
+import { motion } from "framer-motion";
+import Image from "next/image";
 import { OrderItems } from "@/schemas/order";
 import { FormatCurrency } from "@/utils/formatPrice";
-import { Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { ButtonCheckout } from "./buttonCheckout";
 
-export function CartItem({ item }: { item: OrderItems }) {
+export function CartItem({ items }: { items: OrderItems[] }) {
+  const subtotal = items.reduce((sum, item) => sum + item.price, 0);
+  
   return (
-    <Card className="mb-4 overflow-hidden border-l-4 border-l-blue-500 hover:shadow-md transition-shadow">
-      <CardContent className="p-0">
-        <div className="flex items-center justify-between p-4">
-          <div className="flex items-center space-x-4">
-            <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <span className="font-semibold text-blue-600">{item.productCode.substring(0, 2)}</span>
+    <div className="bg-card/80 border border-blue-900/30 rounded-xl p-6 backdrop-blur-sm shadow-lg">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-bold text-blue-50">Orderan </h2>
+        <span className="text-sm bg-primary/20 px-3 py-1 rounded-full text-primary font-medium">
+          {items.length} items
+        </span>
+      </div>
+      
+      {/* Items List */}
+      <div className="space-y-3 mb-6 max-h-80 overflow-y-auto pr-2">
+        {items.map((item) => (
+          <div
+            key={item.id}
+            className="flex gap-4 items-center p-3 bg-blue-900/10 hover:bg-blue-900/20 rounded-lg transition-colors"
+          >
+            <div className="w-16 h-16 bg-blue-950 rounded-lg overflow-hidden flex items-center justify-center shadow-inner">
+              {item.productImage && (
+                <Image
+                  src={item.productImage as string}
+                  alt={item.productName}
+                  width={64}
+                  height={64}
+                  className="object-cover w-full h-full"
+                />
+              )}
             </div>
-            
             <div className="flex-1">
-              <h3 className="font-semibold text-lg text-blue-900">{item.productCode}</h3>
-              
-              <div className="mt-1 space-y-1 text-sm text-gray-600">
-                <div className="flex items-center">
-                  <span className="font-medium min-w-20">Game ID:</span>
-                  <span>{item.gameId}</span>
-                </div>
-                
-                {item.gameServer && (
-                  <div className="flex items-center">
-                    <span className="font-medium min-w-20">Server:</span>
-                    <Badge variant="outline" className="">{item.gameServer}</Badge>
-                  </div>
-                )}
-                
-                {item.nickName && (
-                  <div className="flex items-center">
-                    <span className="font-medium min-w-20">Nickname:</span>
-                    <span className="italic">{item.nickName}</span>
-                  </div>
-                )}
-              </div>
+              <h3 className="text-sm font-medium text-blue-50">{item.productName}</h3>
+              <p className="text-sm text-blue-50">{item.gameId}-{item.gameServer && item.gameServer}</p>
+              {
+                item.nickName && (
+
+              <Badge>
+                {item.nickName}
+              </Badge>
+                )
+              }
+              <p className="text-blue-300/80 text-sm">{FormatCurrency(item.price)}</p>
             </div>
           </div>
-          
-          <div className="text-right">
-            <div className="font-bold text-lg text-blue-800">{FormatCurrency(item.price)}</div>
-            <div className="text-sm mt-1 text-gray-600">Qty: <span className="font-medium">{item.quantity}</span></div>
-            
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="mt-2 text-red-600 hover:text-red-700 hover:bg-red-50 p-2 h-8"
-            >
-              <Trash2 className="h-4 w-4 mr-1" />
-              <span className="text-xs">Remove</span>
-            </Button>
-          </div>
-        </div>
-        
-        <Separator />
-      </CardContent>
-    </Card>
+        ))}
+      </div>
+      <ButtonCheckout subtotal={subtotal} transactionId={items[0].transactionId}/>
+    </div>
   );
 }

@@ -15,7 +15,7 @@ export function useGetMethodsWithQuery(req: FilterMethod) {
     queryFn: async () => {
       try {
         const res = await api.get<ApiResponse<MethodsResponse>>("/methods", {
-          isAll: req.isAll === "true" ? true : false,
+          isAll: req.isAll,
           type: req.type,
           page: req.page,
           limit: req.limit,
